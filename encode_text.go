@@ -179,9 +179,6 @@ func (e *encodeText) writeAny(buf *buffer, val reflect.Value) {
 		buf.WriteByte('{')
 		for i := range val.NumField() {
 			field := val.Type().Field(i)
-			if !field.IsExported() {
-				continue
-			}
 			if i > 0 {
 				e.writeSpace(buf)
 			}

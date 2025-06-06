@@ -490,16 +490,17 @@ func TestWriteAny(t *testing.T) {
 
 		// Test writing struct value
 		testStruct := struct {
-			Name             string
-			Age              int
-			notExportedField string // This field should not be exported
+			Name         string
+			Age          int
+			privateField string // This field should not be exported
 		}{
-			Name: "Test Struct",
-			Age:  30,
+			Name:         "Test Struct",
+			Age:          30,
+			privateField: "This should not be visible",
 		}
 		val := reflect.ValueOf(testStruct)
 		encoder.writeAny(buf, val)
-		expected := "{Name:\"Test Struct\" Age:30}"
+		expected := "{Name:\"Test Struct\" Age:30 privateField:\"This should not be visible\"}"
 		if string(*buf) != expected {
 			t.Errorf("Expected buffer to contain '%s', got '%s'", expected, string(*buf))
 		}
