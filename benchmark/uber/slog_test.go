@@ -35,14 +35,6 @@ func fakeSlogFields() []slog.Attr {
 		slog.Any("user2", _oneUser),
 		slog.Any("users", _tenUsers),
 		slog.Any("error", errExample),
-
-		slog.Int("bytes", ctxBodyBytes),
-		slog.String("request", ctxRequest),
-		slog.Float64("elapsed_time_ms", ctxTimeElapsedMs),
-		slog.Time("now", ctxTime),
-		slog.Any("months", ctxMonths),
-		slog.Any("primes", ctxFirst10Primes),
-		slog.Any("error", ctxErr),
 	}
 }
 
@@ -58,13 +50,5 @@ func fakeSlogArgs() []any {
 		"user2", _oneUser,
 		"users", _tenUsers,
 		"error", errExample,
-
-		"bytes", ctxBodyBytes,
-		"request", ctxRequest,
-		"elapsed_time_ms", ctxTimeElapsedMs,
-		"now", ctxTime,
-		"months", ctxMonths,
-		"primes", ctxFirst10Primes,
-		"error", ctxErr,
 	}
 }
