@@ -1,6 +1,7 @@
 package slogja
 
 import (
+	"fmt"
 	"log/slog"
 	"reflect"
 	"strconv"
@@ -82,22 +83,24 @@ func (e *encodeText) writeLevel(buf *buffer, level slog.Level) {
 	case slog.LevelError:
 		e.style(buf, txtRed)
 		buf.WriteString("ERR ")
+		e.reset(buf)
 	case slog.LevelWarn:
 		e.style(buf, txtYellow)
 		buf.WriteString("WRN ")
+		e.reset(buf)
 	case slog.LevelInfo:
 		e.style(buf, txtGreen)
 		buf.WriteString("INF ")
+		e.reset(buf)
 	case slog.LevelDebug:
 		buf.WriteString("DBG ")
 	}
 
-	e.reset(buf)
 }
 
 func (e *encodeText) writeMessage(buf *buffer, str string) {
 	e.style(buf, txtBold)
-	e.writeString(buf, str, true)
+	e.writeString(buf, str)
 	e.reset(buf)
 	e.writeSpace(buf)
 }
@@ -144,9 +147,9 @@ func (e *encodeText) writeValue(buf *buffer, val slog.Value) {
 	case slog.KindFloat64:
 		e.writeFloat(buf, val.Float64())
 	case slog.KindString:
-		e.writeString(buf, val.String(), true)
+		e.writeString(buf, val.String())
 	case slog.KindTime:
-		e.writeTimeValue(buf, val.Time())
+		e.writeTimeRFC3339(buf, val.Time())
 	case slog.KindDuration:
 		e.writeDuration(buf, val.Duration())
 	case slog.KindAny:
@@ -166,8 +169,13 @@ func (e *encodeText) writeAny(buf *buffer, val reflect.Value) {
 	case reflect.Float32, reflect.Float64:
 		e.writeFloat(buf, val.Float())
 	case reflect.String:
-		e.writeString(buf, val.String(), true)
+		e.writeString(buf, val.String())
 	case reflect.Struct:
+		if str, ok := val.Interface().(fmt.Stringer); ok {
+			buf.WriteString(str.String())
+			return
+		}
+
 		buf.WriteByte('{')
 		for i := range val.NumField() {
 			field := val.Type().Field(i)
@@ -205,11 +213,13 @@ func (e *encodeText) writeAny(buf *buffer, val reflect.Value) {
 		buf.WriteByte(']')
 	case reflect.Ptr:
 		if val.IsNil() {
-			buf.WriteString("null")
+			buf.WriteString("nil")
 			return
 		}
 		buf.WriteString("0x")
 		e.writeUint(buf, uint64(val.Pointer()), 16)
+	case reflect.Invalid:
+		buf.WriteString("nil")
 	}
 }
 
@@ -221,14 +231,10 @@ func (e *encodeText) writeSpace(buf *buffer) {
 	buf.WriteByte(' ')
 }
 
-func (e *encodeText) writeString(buf *buffer, s string, qoute bool) {
-	if qoute {
-		buf.WriteByte('"')
-	}
+func (e *encodeText) writeString(buf *buffer, s string) {
+	buf.WriteByte('"')
 	buf.WriteString(s)
-	if qoute {
-		buf.WriteByte('"')
-	}
+	buf.WriteByte('"')
 }
 
 func (e *encodeText) writeBool(buf *buffer, b bool) {
@@ -255,7 +261,7 @@ func (e *encodeText) writeDuration(buf *buffer, d time.Duration) {
 	*buf = strconv.AppendInt(*buf, int64(d), 10)
 }
 
-func (e *encodeText) writeTimeValue(buf *buffer, t time.Time) {
+func (e *encodeText) writeTimeRFC3339(buf *buffer, t time.Time) {
 	*buf = appendRFC3339Millis(*buf, t)
 }
 
