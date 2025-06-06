@@ -15,15 +15,17 @@ type address struct {
 }
 
 type user struct {
+	id   int
 	Name string
 	Age  int
+	Time time.Time
 	Addr *address
 }
 
 var users = []user{
-	{Name: "Alice", Age: 30, Addr: &address{City: "Wonderland", State: "Fantasy"}},
-	{Name: "Bob", Age: 25, Addr: &address{City: "Builderland", State: "Construction"}},
-	{Name: "Charlie", Age: 35, Addr: nil},
+	{id: 0, Name: "Alice", Age: 30, Addr: &address{City: "Wonderland", State: "Fantasy"}},
+	{id: 1, Name: "Bob", Age: 25, Addr: &address{City: "Builderland", State: "Construction"}},
+	{id: 2, Name: "Charlie", Age: 35, Addr: nil},
 }
 
 var preAttrs = slog.String("pre", "attributes")
